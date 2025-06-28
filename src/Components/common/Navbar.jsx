@@ -41,7 +41,7 @@ export function NavbarDemo() {
           <NavbarLogo />
           <NavItems className='' items={navItems} />
           <div className="flex items-center gap-4">
-            <NavbarButton onClick={()=>navigate('/login')} variant="primary">Login</NavbarButton>
+            <NavbarButton onClick={()=>navigate('/login')} variant="primary" className='!bg-black !text-white'>Login</NavbarButton>
           </div>
         </NavBody>
 

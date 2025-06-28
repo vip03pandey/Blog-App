@@ -7,6 +7,7 @@ import Home from "./Pages/Home";
 import UserLayout from "./Components/Layout/UserLayout";
 import {Login} from './Pages/Login'
 import {Register} from './Pages/Register'
+import {FollowingPointerDemo} from './Pages/Article'
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route index element={<Home />} />
         <Route path="login" element={<Login/>}></Route>
         <Route path="register" element={<Register/>}></Route>
+        <Route path='article' element={<FollowingPointerDemo/>}></Route>
         </Route>
       </Routes>
     </BrowserRouter>
