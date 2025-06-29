@@ -1,6 +1,7 @@
 import React from 'react'
 // import { FollowerPointerCard } from '../Components/ui/following-pointer';
 import { cn } from '../lib/utils';
+import { Link } from 'react-router-dom';
   
   export function FollowingPointerDemo() {
       return (
@@ -8,7 +9,8 @@ import { cn } from '../lib/utils';
 
               <div className='w-full max-w-3xl py-8'>           
                   <div className='flex flex-col gap-4 '>              
-                      {blog.map((blogContent)=>( 
+                      {blog.map((blogContent)=>(
+                        <Link key={blogContent.id} to={`/article/${blogContent.id}`} className="mx-auto w-full border-b-1 rounded-2xl z-10">
                           <div key={blogContent.id} className="mx-auto w-full border-b-1 rounded-2xl z-10">               
                                   <div className='bg-white flex flex-col rounded-2xl border border-zinc-100 transition duration-200 hover:shadow-xl p-4'>                     
                                       <div className='flex flex-row justify-between items-start gap-4'>                         
@@ -48,6 +50,7 @@ import { cn } from '../lib/utils';
                                   </div>               
                               {/* </FollowerPointerCard>                */}
                           </div>
+                          </Link>
                       ))}           
                   </div>           
               </div>       
@@ -57,60 +60,60 @@ import { cn } from '../lib/utils';
   
 
 const blog = [{
-  id:1,
-  slug: "amazing-tailwindcss-grid-layouts",
-  author: "Manu Arora",
-  date: "28th March, 2023",
-  title: "Amazing Tailwindcss Grid Layout Examples",
-  description:
-    "Grids are cool, but Tailwindcss grids are cooler. In this article, we will learn how to create amazing Grid layouts with Tailwindcs grid and React.",
-  image: "https://f5b623aa.delivery.rocketcdn.me/wp-content/uploads/2023/06/page-4.jpg",
-  userAvtaar: "/manu.png",
-  likes:10,
-},{
-id:2,
-slug: "amazing-tailwindcss-grid-layouts",
-author: "Manu Arora",
-date: "28th March, 2023",
-title: "Amazing Tailwindcss Grid Layout Examples",
-description:
-  "Grids are cool, but Tailwindcss grids are cooler. In this article, we will learn how to create amazing Grid layouts with Tailwindcs grid and React.",
-image: "https://f5b623aa.delivery.rocketcdn.me/wp-content/uploads/2023/06/page-4.jpg",
-userAvtaar: "/manu.png",
-likes:10,},
-{
-    id:3,
+    id:1,
     slug: "amazing-tailwindcss-grid-layouts",
     author: "Manu Arora",
     date: "28th March, 2023",
-    title: "This Little-Known PDF Parsing Library Will Save Enterprises Millions",
+    title: "Amazing Tailwindcss Grid Layout Examples",
+    description:
+      "Grids are cool, but Tailwindcss grids are cooler. In this article, we will learn how to create amazing Grid layouts with Tailwindcs grid and React.",
+    image: "https://f5b623aa.delivery.rocketcdn.me/wp-content/uploads/2023/06/page-4.jpg",
+    userAvtaar: "/manu.png",
+    likes:10,
+  },{
+    id:2,
+    slug: "amazing-tailwindcss-grid-layouts",
+    author: "Manu Arora",
+    date: "28th March, 2023",
+    title: "Amazing Tailwindcss Grid Layout Examples",
     description:
       "Grids are cool, but Tailwindcss grids are cooler. In this article, we will learn how to create amazing Grid layouts with Tailwindcs grid and React.",
     image: "https://f5b623aa.delivery.rocketcdn.me/wp-content/uploads/2023/06/page-4.jpg",
     userAvtaar: "/manu.png",
     likes:10,},
-    {
-        id:4,
-        slug: "amazing-tailwindcss-grid-layouts",
-        author: "Manu Arora",
-        date: "28th March, 2023",
-        title: "This new IDE from Google is an absolute game changer",
-        description:
-          "Grids are cool, but Tailwindcss grids are cooler. In this article, we will learn how to create amazing Grid layouts with Tailwindcs grid and React.",
-        image: "https://f5b623aa.delivery.rocketcdn.me/wp-content/uploads/2023/06/page-4.jpg",
-        userAvtaar: "/manu.png",
-        likes:10,},
-        {
-            id:5,
-            slug: "amazing-tailwindcss-grid-layouts",
-            author: "Manu Arora",
-            date: "28th March, 2023",
-            title: "I Did a 2-Minute Plank Every Day for 31 Days — Here’s What Happened",
-            description:
-              "Grids are cool, but Tailwindcss grids are cooler. In this article, we will learn how to create amazing Grid layouts with Tailwindcs grid and React.",
-            image: "https://f5b623aa.delivery.rocketcdn.me/wp-content/uploads/2023/06/page-4.jpg",
-            userAvtaar: "/manu.png",
-            likes:10,},
+  {
+      id:3,
+      slug: "amazing-tailwindcss-grid-layouts",
+      author: "Manu Arora",
+      date: "28th March, 2023",
+      title: "This Little-Known PDF Parsing Library Will Save Enterprises Millions",
+      description:
+        "Grids are cool, but Tailwindcss grids are cooler. In this article, we will learn how to create amazing Grid layouts with Tailwindcs grid and React.",
+      image: "https://f5b623aa.delivery.rocketcdn.me/wp-content/uploads/2023/06/page-4.jpg",
+      userAvtaar: "/manu.png",
+      likes:10,},
+      {
+          id:4,
+          slug: "amazing-tailwindcss-grid-layouts",
+          author: "Manu Arora",
+          date: "28th March, 2023",
+          title: "This new IDE from Google is an absolute game changer",
+          description:
+            "Grids are cool, but Tailwindcss grids are cooler. In this article, we will learn how to create amazing Grid layouts with Tailwindcs grid and React.",
+          image: "https://f5b623aa.delivery.rocketcdn.me/wp-content/uploads/2023/06/page-4.jpg",
+          userAvtaar: "/manu.png",
+          likes:10,},
+          {
+              id:5,
+              slug: "amazing-tailwindcss-grid-layouts",
+              author: "Manu Arora",
+              date: "28th March, 2023",
+              title: "I Did a 2-Minute Plank Every Day for 31 Days — Here’s What Happened",
+              description:
+                "Grids are cool, but Tailwindcss grids are cooler. In this article, we will learn how to create amazing Grid layouts with Tailwindcs grid and React.",
+              image: "https://f5b623aa.delivery.rocketcdn.me/wp-content/uploads/2023/06/page-4.jpg",
+              userAvtaar: "/manu.png",
+              likes:10,},
             {
                 id:6,
                 slug: "amazing-tailwindcss-grid-layouts",
