@@ -3,6 +3,7 @@ import React from "react";
 import { Label } from "../Components/ui/label";
 import { Input } from "../Components/ui/input";
 import { cn } from "../lib/utils";
+import { Link } from "react-router-dom";
 
 export function Register() {
   const handleSubmit = (e) => {
@@ -49,6 +50,11 @@ export function Register() {
           Sign Up &rarr;
           <BottomGradient />
         </button>
+
+       <p className="mt-3">Already have an account? <Link to="/login" className="text-sm text-neutral-600 !mt-5">
+            Login
+          </Link>
+        </p>
 
         <div
           className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />

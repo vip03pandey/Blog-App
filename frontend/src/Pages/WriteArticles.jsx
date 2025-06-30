@@ -1,18 +1,33 @@
-import React, { useState } from 'react';
-import { cn } from '../lib/utils';
-// import { Configuration, OpenAIApi } from "openai";
+import React, { useState, useMemo, useCallback } from 'react';
+import { debounce } from 'lodash';
 
 const WriteArticles = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const configuration = new Configuration({
-    apiKey: "YOUR_OPENAI_API_KEY",
-  });
+  // 🧠 Debounced state setters
+  const debouncedSetTitle = useMemo(
+    () => debounce((val) => setTitle(val), 2000),
+    []
+  );
+
+  const debouncedSetContent = useMemo(
+    () => debounce((val) => setContent(val), 3000),
+    []
+  );
+
+  const handleTitleChange = (e) => {
+    debouncedSetTitle(e.target.value);
+  };
+
+  const handleContentChange = (e) => {
+    debouncedSetContent(e.target.value);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted", { title, content });
+    console.log("Form submitted", { title, content,image });
   };
 
   return (
@@ -22,6 +37,7 @@ const WriteArticles = () => {
       </h1>
 
       <form className="space-y-6" onSubmit={handleSubmit}>
+        {/* Title */}
         <div className="flex flex-col gap-2">
           <label htmlFor="title" className="text-sm font-medium text-gray-700">
             Title
@@ -30,16 +46,16 @@ const WriteArticles = () => {
             <input
               type="text"
               id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={handleTitleChange}
               className="flex-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="Enter your Title"
             />
             <button
               type="button"
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+              disabled={isGenerating}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Generate Title
+              {isGenerating ? 'Generating...' : 'Generate Title'}
             </button>
           </div>
         </div>
@@ -51,9 +67,8 @@ const WriteArticles = () => {
           </label>
           <textarea
             id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={8}
+            onChange={handleContentChange}
+            rows={25}
             className="w-full p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder="Write your story..."
           />
@@ -70,17 +85,35 @@ const WriteArticles = () => {
             className="w-full md:w-1/3 p-2 border border-gray-300 rounded-md file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-blue-500 file:text-white file:rounded-md"
           />
         </div>
+
         <div className="text-center pt-4">
-          <button
+          {/* <button
             type="submit"
-            className="bg-green-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-green-700 transition"
+            className="bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700 transition"
           >
-            Submit Article
-          </button>
+            Publish Article
+          </button> */}
+          <StatefulButtonDemo />
         </div>
       </form>
     </div>
   );
 };
 
+
 export default WriteArticles;
+
+
+import { Button } from '../Components/ui/stateful-button';
+function StatefulButtonDemo() {
+  const handleClick = () => {
+    return new Promise((resolve) => {
+      setTimeout(resolve, 4000);
+    });
+  };
+  return (
+    <div className="flex h-40 w-full items-center justify-center ">
+      <Button onClick={handleClick}>Publish Article</Button>
+    </div>
+  );
+}

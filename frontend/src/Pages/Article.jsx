@@ -3,7 +3,10 @@ import React from 'react'
 import { cn } from '../lib/utils';
 import { Link } from 'react-router-dom';
   
-  export function FollowingPointerDemo() {
+  export function FollowingPointerDemo({filterByUser}) {
+    // const filtered = filterByUser
+    // ? articles.filter(article => article.authorId === filterByUser)
+    // : articles;
       return (
         <div className="relative flex min-h-screen w-full items-center justify-center bg-white px-4 sm:px-6 lg:px-8">
 

@@ -30,7 +30,7 @@ export function TypewriterEffectSmoothDemo() {
           <TvMinimal className="text-white h-8"/>
           Read Articles
         </button>
-        <button
+        <button  onClick={()=>navigate('/write-article')}
           className="w-40 h-10 rounded-xl bg-white text-black border border-black  text-sm flex justify-center items-center gap-1 cursor-pointer">
           <Pen className="text-black h-6"/>
           Write Articles

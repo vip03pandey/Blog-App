@@ -7,7 +7,10 @@ import {Register} from './Pages/Register'
 import {FollowingPointerDemo} from './Pages/Article'
 import ArticleDetails from './Pages/ArticleDetails'
 import WriteArticles from './Pages/WriteArticles'
-
+import ProfileLayout from './Components/Layout/ProfileLayout';
+import Dashboard from './Pages/Dashboard';
+import { Profile } from './Pages/ProfileSideBar';
+import UserDetail from './Pages/UserDetail';
 
 function App() {
   return (
@@ -21,6 +24,10 @@ function App() {
         <Route path='article/:id' element={<ArticleDetails/>}></Route>
         <Route path='write-article' element={<WriteArticles/>}></Route>
         </Route>
+        <Route path="/dashboard" element={<Profile/>}>
+        <Route index element={<Dashboard />} />
+        <Route path="profile" element={<UserDetail/>}></Route>
+      </Route>
       </Routes>
     </BrowserRouter>
   )
