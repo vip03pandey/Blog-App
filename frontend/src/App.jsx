@@ -4,7 +4,7 @@ import Home from "./Pages/Home";
 import UserLayout from "./Components/Layout/UserLayout";
 import {Login} from './Pages/Login'
 import {Register} from './Pages/Register'
-import {FollowingPointerDemo} from './Pages/Article'
+import FollowingPointerDemo from './Pages/Article'
 import ArticleDetails from './Pages/ArticleDetails'
 import WriteArticles from './Pages/WriteArticles'
 import ProfileLayout from './Components/Layout/ProfileLayout';

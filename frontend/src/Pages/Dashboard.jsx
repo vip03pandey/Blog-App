@@ -1,5 +1,5 @@
 import React from 'react'
-import { FollowingPointerDemo } from './Article'
+import  FollowingPointerDemo  from './Article'
 
 const Dashboard = () => {
   return (

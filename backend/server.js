@@ -15,7 +15,12 @@ const app = express();
 app.use(express.json());
 
 // Allow all origins for dev
-app.use(cors());
+
+// Allow requests from your frontend origin
+app.use(cors({
+  origin: 'http://localhost:5173', // or '*' for all origins (not recommended for production)
+  credentials: true // if you use cookies or authentication
+}));
 
 connectDB();
 

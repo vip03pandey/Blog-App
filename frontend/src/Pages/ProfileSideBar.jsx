@@ -1,7 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "../Components/ui/sidebar";
 import Dashboard from "./Dashboard";
+import { useNavigate } from "react-router-dom";
+import * as Tooltip from '@radix-ui/react-tooltip';
 import {
   IconArrowLeft,
   IconBrandTabler,
@@ -14,6 +16,9 @@ import UserLayout from "../Components/Layout/UserLayout";
 import { Outlet } from "react-router-dom";
 
 export function Profile() {
+  const userFromStorage = localStorage.getItem("userInfo");
+  const user = userFromStorage ? JSON.parse(userFromStorage) : null; 
+  const navigate=useNavigate() 
   const links = [
     {
       label: "Dashboard",
@@ -34,13 +39,6 @@ export function Profile() {
       href: "#",
       icon: (
         <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
-    {
-      label: "Logout",
-      href: "#",
-      icon: (
-        <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
   ];
@@ -67,14 +65,24 @@ export function Profile() {
               ))}
             </div>
           </div>
+         
           <div>
+          <div className="cursor-pointer flex flex-1 flex-row overflow-x-hidden overflow-y-auto items-center gap-5"
+                onClick={() => {
+                  localStorage.removeItem("userInfo");
+                  localStorage.removeItem("userToken");
+                  navigate("/");
+                }}>
+          <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+          <p className="text-sm text-neutral-700 dark:text-neutral-200">Logout</p>
+          </div>
             <SidebarLink
               link={{
-                label: "Manu Arora",
-                href: "#",
+                label: user.name,
+                href: "/dashboard/profile",
                 icon: (
                   <img
-                    src="https://assets.aceternity.com/manu.png"
+                    src={user.avatar}
                     className="h-7 w-7 shrink-0 rounded-full"
                     width={50}
                     height={50}
@@ -94,15 +102,15 @@ export function Profile() {
 export const Logo = () => {
   return (
     <a
-      href="#"
+      href="/"
       className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black">
-      <div
-        className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
+      <img src="https://static.vecteezy.com/system/resources/previews/018/930/715/non_2x/blogger-logo-blogger-icon-transparent-free-png.png" lassName="h-7 w-7 shrink-0 rounded-full" width={50}
+                    height={50} alt="" srcset="" />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="font-medium whitespace-pre text-black dark:text-white">
-        Acet Labs
+        OpenScroll
       </motion.span>
     </a>
   );
@@ -110,10 +118,10 @@ export const Logo = () => {
 export const LogoIcon = () => {
   return (
     <a
-      href="#"
+      href="/"
       className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black">
-      <div
-        className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
+     <img src="https://static.vecteezy.com/system/resources/previews/018/930/715/non_2x/blogger-logo-blogger-icon-transparent-free-png.png" className="h-7 w-7 shrink-0 rounded-full" width={50}
+    height={50} alt="" srcset="" />
     </a>
   );
 };

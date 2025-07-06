@@ -4,6 +4,7 @@ import Footer from '../common/Footer'
 import {NavbarDemo} from '../common/Navbar'
 
 const UserLayout = () => {
+  console.log("ENV:", import.meta.env)
   return (
     <div>
       <NavbarDemo/>

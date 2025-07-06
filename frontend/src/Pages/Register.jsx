@@ -1,14 +1,31 @@
 "use client";
-import React from "react";
+import React ,{useState} from "react";
 import { Label } from "../Components/ui/label";
 import { Input } from "../Components/ui/input";
 import { cn } from "../lib/utils";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 export function Register() {
-  const handleSubmit = (e) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const navigate=useNavigate()
+  const handleSubmit = async (e) => {
+
     e.preventDefault();
-    console.log("Form submitted");
+    try{
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/users/register`, {
+        name,
+        email,
+        password,
+      })
+      localStorage.setItem("userInfo",JSON.stringify(response.data.user))
+      localStorage.setItem("userToken",response.data.token)
+      navigate('/');
+      console.log( "Register successful:", response.data);
+    } catch (error) {
+      console.error("Register failed:", error.response?.data?.message || error.message);
+    }
   };
   return (
     <div className="relative flex min-h-screen h-[50rem] w-full max-w-full items-center justify-center bg-white dark:bg-black px-4 sm:px-6 lg:px-8 overflow-x-hidden">
@@ -33,15 +50,15 @@ export function Register() {
         </div>
         <LabelInputContainer className="mb-4 ">
           <Label htmlFor="name" className="!text-neutral-800">Name</Label>
-          <Input id="name" placeholder="Vipul Pandey" type="text" />
+          <Input id="name" placeholder="Vipul Pandey" type="text" onChange={(e) => setName(e.target.value)} value={name} />
         </LabelInputContainer>
         <LabelInputContainer className="mb-4 ">
           <Label htmlFor="email" className="!text-neutral-800">Email Address</Label>
-          <Input id="email" placeholder="projectmayhem@fc.com" type="email" />
+          <Input id="email" placeholder="projectmayhem@fc.com" type="email" onChange={(e) => setEmail(e.target.value)} value={email} />
         </LabelInputContainer>
         <LabelInputContainer className="mb-4">
           <Label htmlFor="password" className="!text-neutral-800">Password</Label>
-          <Input id="password" placeholder="••••••••" type="password" />
+          <Input id="password" placeholder="••••••••" type="password" onChange={(e) => setPassword(e.target.value)} value={password} />
         </LabelInputContainer>
 
         <button
