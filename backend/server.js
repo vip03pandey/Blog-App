@@ -19,7 +19,7 @@ app.use(express.json());
 
 const allowedOrigins = [
   'http://localhost:5173', // for local dev
-  'https://blog-app-djb5-git-main-vip03pandeys-projects.vercel.app/' // Vercel deployed frontend
+  'https://blog-app-djb5-git-main-vip03pandeys-projects.vercel.app' // Vercel deployed frontend
 ];
 
 app.use(cors({
