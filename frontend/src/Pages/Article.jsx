@@ -9,7 +9,9 @@ import {
   TrendingUp,
   Eye,
   AlertCircle,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -18,36 +20,73 @@ const FollowingPointerDemo = ({ filterByUser }) => {
   const [blog, setBlog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalPosts: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+    limit: 10
+  });
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const fetchBlogs = async (page = 1, append = false) => {
+    try {
+      if (!append) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+      setError(null);
+      
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/post`, {
+        params: { page, limit: 10 }
+      });
+      
+      const { posts, pagination: paginationData } = response.data;
+      
+      // Filter posts if needed
+      const filteredPosts = filterByUser
+        ? posts.filter((post) => post.author?._id === filterByUser)
+        : posts;
+
+      if (append) {
+        setBlog(prev => [...prev, ...filteredPosts]);
+      } else {
+        setBlog(filteredPosts);
+      }
+      
+      setPagination(paginationData);
+    } catch (err) {
+      console.error('Error fetching blogs:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/post`);
-        const allPosts = response.data;
-  
-        const filteredPosts = filterByUser
-          ? allPosts.filter((post) => post.author?._id === filterByUser)
-          : allPosts;
-  
-        setBlog(filteredPosts);
-      } catch (err) {
-        console.error('Error fetching blogs:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    fetchBlogs();
+    fetchBlogs(1);
   }, [filterByUser]);
-  
+
+  const handleLoadMore = () => {
+    if (pagination.hasNextPage && !loadingMore) {
+      fetchBlogs(pagination.currentPage + 1, true);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      fetchBlogs(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   if (loading) return <LoadingState />;
-  if (error && blog.length === 0) return <ErrorState error={error} onRetry={() => window.location.reload()} />;
+  if (error && blog.length === 0) return <ErrorState error={error} onRetry={() => fetchBlogs(1)} />;
 
-  return (
+  return blog.length===0 ? (<div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 px-4 sm:px-6 lg:px-8 py-12"><p className='text-5xl text-center'>No posts found</p></div>):(
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 px-4 sm:px-6 lg:px-8 py-12">
       <div className="mx-auto max-w-4xl">
         <div className="text-center mb-12">
@@ -60,11 +99,14 @@ const FollowingPointerDemo = ({ filterByUser }) => {
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Discover amazing articles from our community of writers and thought leaders
           </p>
+          {/* <div className="mt-4 text-sm text-gray-500">
+            Showing {blog.length} of {pagination.totalPosts} posts
+          </div> */}
           {error && (
             <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800">
                 <AlertCircle className="inline w-4 h-4 mr-1" />
-                Unable to load latest posts. Showing sample content.
+                Unable to load latest posts. Showing available content.
               </p>
             </div>
           )}
@@ -80,19 +122,79 @@ const FollowingPointerDemo = ({ filterByUser }) => {
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <button 
-            className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
-            onClick={() => console.log('Load more clicked')}
+        {/* Load More Button */}
+        {pagination.hasNextPage && (
+          <div className="text-center mt-12">
+            <button 
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+            >
+              {loadingMore ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2 inline" />
+                  Loading...
+                </>
+              ) : (
+                'Load More Stories'
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Page Navigation */}
+        <div className="flex items-center justify-center mt-8 space-x-2">
+          <button
+            onClick={() => handlePageChange(pagination.currentPage - 1)}
+            disabled={!pagination.hasPrevPage}
+            className="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Load More Stories
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Previous
           </button>
+
+          {/* Page Numbers */}
+          <div className="flex space-x-1">
+            {[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
+              const pageNum = Math.max(1, pagination.currentPage - 2) + i;
+              if (pageNum > pagination.totalPages) return null;
+              
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    pageNum === pagination.currentPage
+                      ? 'bg-blue-500 text-white'
+                      : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => handlePageChange(pagination.currentPage + 1)}
+            disabled={!pagination.hasNextPage}
+            className="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </button>
+        </div>
+
+        {/* Pagination Info */}
+        <div className="text-center mt-4 text-sm text-gray-500">
+          Page {pagination.currentPage} of {pagination.totalPages}
         </div>
       </div>
     </div>
-  );
+    )
 };
 
+// Rest of your components remain the same...
 const BlogCard = ({ blogContent, index }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
@@ -110,7 +212,22 @@ const BlogCard = ({ blogContent, index }) => {
         <div className="relative p-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              {blogContent.author?.avatar ? (
+                <img
+                  src={blogContent.author.avatar}
+                  alt={blogContent.author.name}
+                  className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div 
+                className={`w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ${
+                  blogContent.author?.avatar ? 'hidden' : ''
+                }`}
+              >
                 <User className="w-5 h-5 text-white" />
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>

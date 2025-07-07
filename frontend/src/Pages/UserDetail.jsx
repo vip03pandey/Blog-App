@@ -94,13 +94,24 @@ const UserDetail = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.log("Updated user data:", formData);
-
+  
     try {
       const token = localStorage.getItem("userToken");
+  
+      const updatedData = {
+        name: formData.name,
+        bio: formData.bio,
+        avatar: formData.avatar,
+      };
+      
+      if (formData.password.trim() !== "") {
+        updatedData.password = formData.password;
+      }
+      console.log("Updated data sent:", updatedData);
+  
       const res = await axios.put(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/profile`,
-        formData,
+        updatedData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -113,6 +124,7 @@ const UserDetail = () => {
       toast.error("Failed to update profile.");
     }
   };
+  
 
   if (loading) return <div className="p-10 text-lg">Loading...</div>;
 

@@ -18,14 +18,43 @@ router.post('/', protect, async (req, res) => {
   });
 
 // get post
-router.get('/',async(req,res)=>{
-    try{
-        const posts=await Post.find().sort({ createdAt: -1 }).populate('author','name avatar');
-        res.status(200).json(posts);
-    }catch(error){
-        res.status(500).json({message:error.message});
-    }
-})
+router.get('/', async (req, res) => {
+  try {
+      // Get page and limit from query parameters, with defaults
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      // Get total count for pagination info
+      const totalPosts = await Post.countDocuments();
+      
+      // Fetch posts with pagination
+      const posts = await Post.find()
+          .sort({ createdAt: -1 })
+          .populate('author', 'name avatar')
+          .skip(skip)
+          .limit(limit);
+
+      const totalPages = Math.ceil(totalPosts / limit);
+      const hasNextPage = page < totalPages;
+      const hasPrevPage = page > 1;
+
+      res.status(200).json({
+          posts,
+          pagination: {
+              currentPage: page,
+              totalPages,
+              totalPosts,
+              hasNextPage,
+              hasPrevPage,
+              limit
+          }
+      });
+  } catch (error) {
+      res.status(500).json({ message: error.message });
+  }
+});
+
 
 
 
@@ -93,35 +122,29 @@ router.get('/:id/comment', protect, async (req, res) => {
   });
 
 // increment likes
-router.post('/:id/like',protect,async(req,res)=>{
-    try{
-        const post=await Post.findById(req.params.id);
-        if(!post){
-            res.status(404).json({message:'Post not found'});
-        }
-        post.likes++;
-        await post.save();
-        res.status(200).json(post);
+router.put('/:id/like', protect, async (req, res) => {
+  try {
+    const article = await Post.findById(req.params.id);
+    if (!article) {
+      return res.status(404).json({ message: 'Article not found' });
     }
-    catch(error){
-        res.status(500).json({message:error.message});
+
+    const { action } = req.body; // 'like' or 'unlike'
+
+    if (action === 'like') {
+      article.likes += 1;
+    } else if (action === 'unlike' && article.likes > 0) {
+      article.likes -= 1;
     }
-})
-// decrement likes
-router.delete('/:id/like',protect,async(req,res)=>{
-    try{
-        const post=await Post.findById(req.params.id);
-        if(!post){
-            res.status(404).json({message:'Post not found'});
-        }
-        post.likes--;
-        await post.save();
-        res.status(200).json(post);
-    }
-    catch(error){
-        res.status(500).json({message:error.message});
-    }
-})
+
+    await article.save();
+
+    res.status(200).json({ likes: article.likes });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 // generate titles for posts
 router.post('/generateTitle', protect, async (req, res) => {

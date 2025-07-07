@@ -5,7 +5,7 @@ import axios from 'axios';
 import {
   Copy,
   Check,
-  Heart,
+  Heart, HeartOff,
   MessageCircle,
   Share2,
   Calendar,
@@ -20,6 +20,7 @@ const ArticleDetails = () => {
   const [comment, setComment] = useState('');
   const [copied, setCopied] = useState(false);
   const params = useParams();
+  const [liked, setLiked] = useState(false);
   const [articles, setArticle] = useState({
     _id: '',
     title: '',
@@ -49,7 +50,32 @@ const ArticleDetails = () => {
     setInputComment(e.target.value);
     debouncedSetComment(e.target.value);
   };
-
+  console.log("Liked state before:", liked);
+  const handleToggleLike = async () => {
+    const token = localStorage.getItem('userToken');
+    const action = liked ? 'unlike' : 'like';
+  
+    try {
+      const res = await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/api/post/${params.id}/like`,
+        { action },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      setArticle((prev) => ({
+        ...prev,
+        likes: res.data.likes,
+      }));
+  
+      setLiked(!liked); 
+    } catch (err) {
+      console.error('Failed to toggle like:', err);
+    }
+  };
   const handleCopyLink = async () => {
     try {
       const articleUrl = `${window.location.origin}/article/${articles._id}`;
@@ -270,10 +296,18 @@ const ArticleDetails = () => {
 
             <div className="flex items-center justify-between mt-12 pt-8 border-t border-gray-200">
               <div className="flex items-center gap-6">
-                <button className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors duration-200">
-                  <Heart className="w-5 h-5" />
-                  <span className="font-medium">{articles.likes}</span>
-                </button>
+              <button
+                onClick={handleToggleLike}
+                className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors duration-200"
+              >
+              {liked ? (
+                  <Heart className="w-5 h-5 " />
+                ) : (
+                  <HeartOff className="w-5 h-5 " />
+                )}
+                <span className="font-medium">{articles.likes}</span>
+              </button>
+
                 <button className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors duration-200">
                   <MessageCircle className="w-5 h-5" />
                   <span className="font-medium">{articles.comments.length}</span>

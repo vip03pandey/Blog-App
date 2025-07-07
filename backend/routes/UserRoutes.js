@@ -68,29 +68,29 @@ const bcrypt = require('bcryptjs');
 
 router.put('/profile', protect, async (req, res) => {
     try {
-        const { name, bio, avatar, password } = req.body;
-        const user = await User.findById(req.user.id);
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        user.name = name || user.name;
-        user.bio = bio || user.bio;
-        user.avatar = avatar || user.avatar;
-
-        if (password) {
-            const salt = await bcrypt.genSalt(10);
-            user.password = await bcrypt.hash(password, salt);
-        }
-
-        await user.save();
-        res.json(user);
+      const { name, bio, avatar, password } = req.body;
+      const user = await User.findById(req.user.id);
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      user.name = name || user.name;
+      user.bio = bio || user.bio;
+      user.avatar = avatar || user.avatar;
+  
+      if (password && password.trim() !== "") {
+        user.password = password; 
+      }
+  
+      await user.save();
+      res.json(user);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Server Error' });
+      console.error(err.message);
+      res.status(500).json({ message: 'Server Error' });
     }
-});
+  });
+  
 
 
 module.exports=router;
