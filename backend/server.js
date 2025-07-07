@@ -16,10 +16,21 @@ app.use(express.json());
 
 // Allow all origins for dev
 
-// Allow requests from your frontend origin
+
+const allowedOrigins = [
+  'http://localhost:5173', // for local dev
+  'https://blog-app-djb5-git-main-vip03pandeys-projects.vercel.app/' // Vercel deployed frontend
+];
+
 app.use(cors({
-  origin: 'http://localhost:5173', // or '*' for all origins (not recommended for production)
-  credentials: true // if you use cookies or authentication
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
 
 connectDB();
