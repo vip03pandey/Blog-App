@@ -25,7 +25,13 @@ const FollowingPointerDemo = ({ filterByUser }) => {
         setLoading(true);
         setError(null);
         const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/post`);
-        setBlog(response.data);
+        const allPosts = response.data;
+  
+        const filteredPosts = filterByUser
+          ? allPosts.filter((post) => post.author?._id === filterByUser)
+          : allPosts;
+  
+        setBlog(filteredPosts);
       } catch (err) {
         console.error('Error fetching blogs:', err);
         setError(err.message);
@@ -33,9 +39,10 @@ const FollowingPointerDemo = ({ filterByUser }) => {
         setLoading(false);
       }
     };
-
+  
     fetchBlogs();
-  }, []);
+  }, [filterByUser]);
+  
 
   if (loading) return <LoadingState />;
   if (error && blog.length === 0) return <ErrorState error={error} onRetry={() => window.location.reload()} />;

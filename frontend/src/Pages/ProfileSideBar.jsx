@@ -1,12 +1,13 @@
 "use client";
-import React, { use, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "../Components/ui/sidebar";
 import Dashboard from "./Dashboard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import * as Tooltip from '@radix-ui/react-tooltip';
 import {
   IconArrowLeft,
   IconBrandTabler,
+  IconHome,
   IconSettings,
   IconUserBolt,
 } from "@tabler/icons-react";
@@ -14,11 +15,68 @@ import { motion } from "motion/react";
 import { cn } from "../lib/utils";
 import UserLayout from "../Components/Layout/UserLayout";
 import { Outlet } from "react-router-dom";
+import axios from "axios";
 
 export function Profile() {
-  const userFromStorage = localStorage.getItem("userInfo");
-  const user = userFromStorage ? JSON.parse(userFromStorage) : null; 
-  const navigate=useNavigate() 
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Move localStorage calls inside useEffect to prevent re-renders
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [userDetail, setUserDetails] = useState({
+    name: '',
+    avatar: ''
+  });
+
+  // Initialize user and token once
+  useEffect(() => {
+    const userFromStorage = localStorage.getItem("userInfo");
+    const tokenFromStorage = localStorage.getItem("userToken");
+    
+    if (userFromStorage && tokenFromStorage) {
+      const parsedUser = JSON.parse(userFromStorage);
+      setUser(parsedUser);
+      setToken(tokenFromStorage);
+      setUserDetails({
+        name: parsedUser.name || '',
+        avatar: parsedUser.avatar || ''
+      });
+    }
+  }, []);
+
+  // Fetch user details only when user and token are set
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        console.log('Fetching user details for:', user._id);
+        console.log('Current user avatar:', user.avatar);
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/users/profile`,
+          { 
+            headers: { Authorization: `Bearer ${token}` },
+            params: { id: user._id }
+          }
+        );
+        console.log('User details response:', res.data);
+        console.log('New avatar from API:', res.data.avatar);
+        setUserDetails(res.data);
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+        // Fallback to original user data if API fails
+        console.log('Using fallback user data');
+        setUserDetails({
+          name: user.name,
+          avatar: user.avatar
+        });
+      }
+    };
+
+    if (user && token && user._id) {
+      fetchUserDetails();
+    }
+  }, [user, token]); // This will only run once when user and token are initially set
+
   const links = [
     {
       label: "Dashboard",
@@ -35,21 +93,33 @@ export function Profile() {
       ),
     },
     {
-      label: "Settings",
-      href: "#",
+      label: "Home",
+      href: "/",
       icon: (
-        <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <IconHome className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
   ];
-  const renderContent = () => {
-    if (location.pathname === '/dashboard') return <Dashboard />;
-    if (location.pathname === '/profile') return <UserLayout />;
-    if (location.pathname === '/profile/account') return <Account />;
-    if (location.pathname === '/profile/notifications') return <Notifications />;
-    return <div>404</div>;
-  };
+
+  // const renderContent = () => {
+  //   if (location.pathname === '/dashboard') return <Dashboard />;
+  //   if (location.pathname === '/profile') return <UserLayout />;
+  //   if (location.pathname === '/profile/account') return <Account />;
+  //   if (location.pathname === '/profile/notifications') return <Notifications />;
+  //   return <div>404</div>;
+  // };
+
   const [open, setOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("userInfo");
+    localStorage.removeItem("userToken");
+    navigate("/");
+  };
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div
       className={cn(
@@ -67,45 +137,55 @@ export function Profile() {
           </div>
          
           <div>
-          <div className="cursor-pointer flex flex-1 flex-row overflow-x-hidden overflow-y-auto items-center gap-5"
-                onClick={() => {
-                  localStorage.removeItem("userInfo");
-                  localStorage.removeItem("userToken");
-                  navigate("/");
-                }}>
-          <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-          <p className="text-sm text-neutral-700 dark:text-neutral-200">Logout</p>
-          </div>
+            <div 
+              className="cursor-pointer flex flex-1 flex-row overflow-x-hidden overflow-y-auto items-center gap-5"
+              onClick={handleLogout}
+            >
+              <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+              <p className="text-sm text-neutral-700 dark:text-neutral-200">Logout</p>
+            </div>
             <SidebarLink
               link={{
-                label: user.name,
+                label: userDetail.name || user?.name || 'User',
                 href: "/dashboard/profile",
                 icon: (
                   <img
-                    src={user.avatar}
-                    className="h-7 w-7 shrink-0 rounded-full"
+                    src={userDetail.avatar || user?.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(userDetail.name || user?.name || 'User') + '&background=3b82f6&color=fff&size=128'}
+                    className="h-7 w-7 shrink-0 rounded-full object-cover"
                     width={50}
                     height={50}
-                    alt="Avatar" />
+                    alt="Avatar"
+                    onError={(e) => {
+                      console.log('Avatar failed to load:', e.target.src);
+                      // Use a reliable fallback service
+                      e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(userDetail.name || user?.name || 'User') + '&background=6b7280&color=fff&size=128';
+                    }}
+                  />
                 ),
-              }} />
+              }} 
+            />
           </div>
         </SidebarBody>
       </Sidebar>
       <div className="flex-1 overflow-y-auto p-4">
-          <Outlet></Outlet>
-</div>
-
+        <Outlet />
+      </div>
     </div>
   );
 }
+
 export const Logo = () => {
   return (
     <a
       href="/"
       className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black">
-      <img src="https://static.vecteezy.com/system/resources/previews/018/930/715/non_2x/blogger-logo-blogger-icon-transparent-free-png.png" lassName="h-7 w-7 shrink-0 rounded-full" width={50}
-                    height={50} alt="" srcset="" />
+      <img 
+        src="https://static.vecteezy.com/system/resources/previews/018/930/715/non_2x/blogger-logo-blogger-icon-transparent-free-png.png" 
+        className="h-7 w-7 shrink-0 rounded-full" 
+        width={50}
+        height={50} 
+        alt="OpenScroll Logo" 
+      />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -115,13 +195,19 @@ export const Logo = () => {
     </a>
   );
 };
+
 export const LogoIcon = () => {
   return (
     <a
       href="/"
       className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black">
-     <img src="https://static.vecteezy.com/system/resources/previews/018/930/715/non_2x/blogger-logo-blogger-icon-transparent-free-png.png" className="h-7 w-7 shrink-0 rounded-full" width={50}
-    height={50} alt="" srcset="" />
+      <img 
+        src="https://static.vecteezy.com/system/resources/previews/018/930/715/non_2x/blogger-logo-blogger-icon-transparent-free-png.png" 
+        className="h-7 w-7 shrink-0 rounded-full" 
+        width={50}
+        height={50} 
+        alt="OpenScroll Logo" 
+      />
     </a>
   );
 };

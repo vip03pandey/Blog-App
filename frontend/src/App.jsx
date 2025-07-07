@@ -11,10 +11,11 @@ import ProfileLayout from './Components/Layout/ProfileLayout';
 import Dashboard from './Pages/Dashboard';
 import { Profile } from './Pages/ProfileSideBar';
 import UserDetail from './Pages/UserDetail';
-
+import { Toaster } from 'sonner';
 function App() {
   return (
     <BrowserRouter>
+    <Toaster position="top-right" reverseOrder={false}/>
       <Routes>
         <Route path="/" element={<UserLayout />}>
         <Route index element={<Home />} />

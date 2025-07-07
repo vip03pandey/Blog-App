@@ -5,6 +5,7 @@ import { Input } from "../Components/ui/input";
 import { cn } from "../lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "sonner";
 export function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,10 +22,12 @@ export function Register() {
       })
       localStorage.setItem("userInfo",JSON.stringify(response.data.user))
       localStorage.setItem("userToken",response.data.token)
+      toast.success("Register successful!");
       navigate('/');
-      console.log( "Register successful:", response.data);
+      // console.log( "Register successful:", response.data);
     } catch (error) {
-      console.error("Register failed:", error.response?.data?.message || error.message);
+      // console.error("Register failed:", error.response?.data?.message || error.message);
+      toast.error("Failed to register.");
     }
   };
   return (

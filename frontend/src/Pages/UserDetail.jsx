@@ -1,16 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Label } from "../Components/ui/label";
 import { Input } from "../Components/ui/input";
 import { cn } from "../lib/utils";
-
-const user = {
-  id: 1,
-  name: "Manu Arora",
-  email: "manu@gmail.com",
-  avatar:
-    "https://cdn.prod.website-files.com/63bc83b29094ec80844b6dd5/6526dc79dea0f080d2d61d6f_Starting-with-large-language-models.webp",
-  bio: "I am a software engineer and a writer.",
-};
+import axios from "axios";
+import { toast } from 'sonner';
 
 const LabelInputContainer = ({ children, className }) => (
   <div className={cn("flex w-full flex-col space-y-2", className)}>
@@ -27,79 +20,130 @@ const BottomGradient = () => (
 
 const UserDetail = () => {
   const [formData, setFormData] = useState({
-    name: user.name,
-    email: user.email,
+    name: "",
+    email: "",
     password: "",
-    bio: user.bio,
-    avatar: user.avatar,
+    bio: "",
+    avatar: "",
   });
 
   const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user details from backend
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("userToken");
+        if (!token) return;
+
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/users/profile`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const { name, email, bio, avatar } = res.data;
+        setFormData((prev) => ({
+          ...prev,
+          name,
+          email,
+          bio: bio || "",
+          avatar: avatar || "/default-avatar.png",
+        }));
+      } catch (err) {
+        console.error("Failed to load user:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-//   const handleImageUpload = async (e) => {
-//     const file = e.target.files[0];
-//     if (!file) return;
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-//     setUploading(true);
-//     const formDataImg = new FormData();
-//     formDataImg.append("image", file);
+    const formDataImg = new FormData();
+    formDataImg.append("image", file);
 
-//     try {
-//       const res = await fetch("/api/upload", {
-//         method: "POST",
-//         body: formDataImg,
-//       });
-//       const data = await res.json();
-//       setFormData((prev) => ({ ...prev, avatar: data.imageUrl }));
-//     } catch (err) {
-//       console.error("Image upload error", err);
-//     } finally {
-//       setUploading(false);
-//     }
-//   };
+    setUploading(true);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Updated user data:", formData);
-    alert("Profile updated!");
-    // Call backend API to save
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/upload`, formDataImg);
+      setFormData((prev) => ({
+        ...prev,
+        avatar: res.data.imageUrl,
+      }));
+    } catch (err) {
+      console.error("Image upload error:", err);
+      toast.error("Failed to upload image.");
+    } finally {
+      setUploading(false);
+    }
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // console.log("Updated user data:", formData);
+
+    try {
+      const token = localStorage.getItem("userToken");
+      const res = await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/profile`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("Profile updated successfully!");
+    } catch (err) {
+      console.error("Error updating profile", err);
+      toast.error("Failed to update profile.");
+    }
+  };
+
+  if (loading) return <div className="p-10 text-lg">Loading...</div>;
 
   return (
     <div className="bg-white max-w-screen h-screen mt-0 p-8 overflow-y-auto">
-        <h1 className="text-2xl md:text-4xl font-bold mb-5">Update Profile</h1>
+      <h1 className="text-2xl md:text-4xl font-bold mb-5">Update Profile</h1>
       <form onSubmit={handleSubmit} className="space-y-6 max-w-lg mx-auto border-1 border-gray-300 rounded-md p-6">
-        {/* Avatar Upload Section */}
-        {/* <div className="flex items-center space-x-4"> */}
         <LabelInputContainer>
-        <Label htmlFor="avataar" className="!text-black !ml-0">Change Avatar</Label>
+          <Label htmlFor="avatar" className="!text-black !ml-0">Avatar</Label>
           <img
             src={formData.avatar}
             alt="avatar"
             className="w-16 h-16 rounded-full object-cover border mx-auto"
+            onError={(e) => { e.target.src = "/default-avatar.png"; }}
           />
           <input
             type="file"
             accept="image/*"
-            // onChange={handleImageUpload}
+            onChange={handleImageUpload}
             className="text-sm mx-auto"
-          ></input>
-        {/* </div> */}
+          />
         </LabelInputContainer>
         {uploading && <p className="text-sm text-gray-500">Uploading...</p>}
 
         <LabelInputContainer>
-          <Label htmlFor="email">Email Address</Label>
+          <Label htmlFor="email" className="!text-black !ml-0">Email Address</Label>
           <Input id="email" value={formData.email} disabled />
         </LabelInputContainer>
 
         <LabelInputContainer>
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name" className="!text-black !ml-0">Name</Label>
           <Input
             id="name"
             name="name"
@@ -109,7 +153,7 @@ const UserDetail = () => {
         </LabelInputContainer>
 
         <LabelInputContainer>
-          <Label htmlFor="bio">Bio</Label>
+          <Label htmlFor="bio" className="!text-black !ml-0">Bio</Label>
           <textarea
             id="bio"
             name="bio"
@@ -121,7 +165,7 @@ const UserDetail = () => {
         </LabelInputContainer>
 
         <LabelInputContainer>
-          <Label htmlFor="password">New Password</Label>
+          <Label htmlFor="password" className="!text-black !ml-0">New Password</Label>
           <Input
             id="password"
             name="password"

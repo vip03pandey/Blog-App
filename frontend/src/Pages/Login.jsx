@@ -5,6 +5,7 @@ import { Input } from "../Components/ui/input";
 import { cn } from "../lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "sonner";
 
 export function Login() {
   const navigate=useNavigate()
@@ -20,10 +21,10 @@ export function Login() {
       localStorage.setItem("userInfo",JSON.stringify(response.data.user))
       localStorage.setItem("userToken",response.data.token);
       console.log("Saved user:", response.data.user);
+      toast.success("Login successful!");
       navigate('/dashboard');
-      console.log( "Login successful:", response.data);
     } catch (error) {
-      console.error("Login failed:", error.response?.data?.message || error.message);
+      toast.error("Failed to login.");
     }
   };
   

@@ -4,21 +4,23 @@ const router=express.Router();
 const mongoose=require('mongoose');
 const protect=require('../middleware/authMiddleware');
 const { OpenAI } = require('openai');
+require('dotenv').config();
+
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
 // write post
-router.post('/',protect,async(req,res)=>{
-    const {title,content,image}=req.body;
-    const post=new Post({title,content,image,author:req.user.id});
-    const savedPost=await post.save();
+router.post('/', protect, async (req, res) => {
+    const { title, content, image } = req.body;
+    const post = new Post({ title, content, image, author: req.user.id });
+    const savedPost = await post.save();
     res.status(201).json(savedPost);
-})
+  });
 
 // get post
 router.get('/',async(req,res)=>{
     try{
-        const posts=await Post.find().sort({ createdAt: -1 }).populate('author');
+        const posts=await Post.find().sort({ createdAt: -1 }).populate('author','name avatar');
         res.status(200).json(posts);
     }catch(error){
         res.status(500).json({message:error.message});
@@ -28,55 +30,67 @@ router.get('/',async(req,res)=>{
 
 
 // get post by id
-router.get('/:id',protect,async(req,res)=>{
-    try{
-        const post=await Post.findById(req.params.id).populate('author');
-        if(!post){
-            res.status(404).json({message:'Post not found'});
-        }
-        res.status(200).json(post);
+router.get('/:id', protect, async (req, res) => {
+    try {
+      const post = await Post.findById(req.params.id)
+        .populate('author', 'name avatar');
+  
+      if (!post) {
+        return res.status(404).json({ message: 'Post not found' });
+      }
+  
+      res.status(200).json(post);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: error.message });
     }
-    catch(error){
-        res.status(500).json({message:error.message});
-    }
-}
-)
+  });
+  
 
 // post comment
-router.post('/:id/comment',protect,async(req,res)=>{
-    try{
-        const {content}=req.body
-        const post=await Post.findById(req.params.id);
-        if(!post){
-            res.status(404).json({message:'Post not found'});
-        }
-        const comment = {
-            content,
-            user: req.user.id,
-          };
-      
-          post.comments.push(comment);
-          await post.save();
-        res.status(201).json(comment);
+router.post('/:id/comment', protect, async (req, res) => {
+    try {
+    //   console.log('Received comment:', req.body.content);
+    //   console.log('User:', req.user); // Check if this exists
+      const { content } = req.body;
+  
+      const post = await Post.findById(req.params.id);
+      if (!post) {
+        console.log('Post not found');
+        return res.status(404).json({ message: 'Post not found' });
+      }
+  
+      const comment = {
+        content,
+        user: req.user.id,
+      };
+  
+      post.comments.push(comment);
+      await post.save();
+  
+      res.status(201).json(comment);
+    } catch (error) {
+      console.error('Error posting comment:', error);
+      res.status(500).json({ message: error.message });
     }
-    catch(error){
-        res.status(500).json({message:error.message});
-    }
-})
+  });
+  
 
 // get post comments
-router.get('/:id/comment',protect,async(req,res)=>{
-    try{
-        const post=await Post.findById(req.params.id).populate('comments.user');
-        if(!post){
-            res.status(404).json({message:'Post not found'});
-        }
-        res.status(200).json(post.comments);
+router.get('/:id/comment', protect, async (req, res) => {
+    try {
+      const post = await Post.findById(req.params.id)
+        .populate('comments.user', 'name avatar createdAt')
+  
+      if (!post) {
+        return res.status(404).json({ message: 'Post not found' });
+      }
+  
+      res.status(200).json(post.comments);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
-    catch(error){
-        res.status(500).json({message:error.message});
-    }
-})
+  });
 
 // increment likes
 router.post('/:id/like',protect,async(req,res)=>{
