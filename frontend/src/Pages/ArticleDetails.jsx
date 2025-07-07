@@ -173,7 +173,7 @@ const ArticleDetails = () => {
         await fetchComments()
       } catch (error) {
         console.error('Error fetching article:', error);
-        setError('Failed to load article');
+        setError('Please Login before viewing this article');
       } finally {
         setLoading(false);
       }
