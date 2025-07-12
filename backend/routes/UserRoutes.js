@@ -14,7 +14,7 @@ router.post('/register',async(req,res)=>{
         user=new User({name,email,password});
         await user.save();
         const payload={user:user._id};
-        jwt.sign(payload,process.env.JWT_SECRET,{expiresIn:'1h'},(err,token)=>{
+        jwt.sign(payload,process.env.JWT_SECRET,{expiresIn:'24h'},(err,token)=>{
             if(err) return res.status(500).json({message:"Server Error"});
             res.status(201).json({user:{
                 _id:user._id,
