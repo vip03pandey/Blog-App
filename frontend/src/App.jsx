@@ -12,23 +12,52 @@ import Dashboard from './Pages/Dashboard';
 import { Profile } from './Pages/ProfileSideBar';
 import UserDetail from './Pages/UserDetail';
 import { Toaster } from 'sonner';
+import ProtectedRoute from './Components/common/ProtectedRoutes';
+
 function App() {
   return (
     <BrowserRouter>
-    <Toaster position="top-right" reverseOrder={false}/>
+      <Toaster position="top-right" reverseOrder={false}/>
       <Routes>
         <Route path="/" element={<UserLayout />}>
-        <Route index element={<Home />} />
-        <Route path="login" element={<Login/>}></Route>
-        <Route path="register" element={<Register/>}></Route>
-        <Route path='article' element={<FollowingPointerDemo/>}></Route>
-        <Route path='article/:id' element={<ArticleDetails/>}></Route>
-        <Route path='write-article' element={<WriteArticles/>}></Route>
+          <Route index element={<Home />} />
+          <Route path="login" element={<Login/>}></Route>
+          <Route path="register" element={<Register/>}></Route>
+          <Route path='article' element={<FollowingPointerDemo/>}></Route>
+          
+          {/* Protected route for reading individual articles */}
+          <Route 
+            path='article/:id' 
+            element={
+              <ProtectedRoute>
+                <ArticleDetails/>
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Protected route for writing articles */}
+          <Route 
+            path='write-article' 
+            element={
+              <ProtectedRoute>
+                <WriteArticles/>
+              </ProtectedRoute>
+            }
+          />
         </Route>
-        <Route path="/dashboard" element={<Profile/>}>
-        <Route index element={<Dashboard />} />
-        <Route path="profile" element={<UserDetail/>}></Route>
-      </Route>
+        
+        {/* Protected dashboard routes */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <Profile/>
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="profile" element={<UserDetail/>}></Route>
+        </Route>
       </Routes>
     </BrowserRouter>
   )
