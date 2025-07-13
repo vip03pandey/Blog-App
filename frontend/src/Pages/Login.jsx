@@ -15,7 +15,7 @@ export function Login() {
   const [password, setPassword] = useState("");
   
   // Get the page user was trying to access, default to dashboard
-  const from = location.state?.from?.pathname || '/dashboard'
+  const from = location.state?.from?.pathname || '/article'
   
   const handleSubmit = async (e) => {
     e.preventDefault(); 
